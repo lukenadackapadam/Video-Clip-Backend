@@ -1,5 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import psycopg2
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+from moviepy.editor import VideoFileClip
+import os
+from tkinter import Tk, filedialog
+
 
 app = Flask(__name__)
 
@@ -29,7 +34,7 @@ app = Flask(__name__)
 # conn.close()
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
 	try:
 	# Connect to the database
@@ -66,82 +71,38 @@ def index():
 		return jsonify({'error': str(e)})
 
 
-# @app.route('/create', methods=['POST'])
-# def create():
-# 	conn = psycopg2.connect(database="flask_db",
-# 							user="postgres",
-# 							password="root",
-# 							host="localhost", port="5432")
+@app.route('/subclip', methods=['POST'])
+def subclip():
+	# Create a Tkinter window to open the file dialog
+	root = Tk()
+	root.withdraw() # Hide the main window
 
-# 	cur = conn.cursor()
+# Ask the user to select the input video file
+input_video = filedialog.askopenfilename(initialdir=os.path.expanduser("~") + "/Downloads/")
 
-# 	# Get the data from the form
-# 	name = request.form['name']
-# 	price = request.form['price']
+if not input_video:
+    print("No video file selected. Exiting...")
+else:
+    # Set the start and end times for the subclip (in seconds)
+    start_time = float(input("Enter the start time (in seconds): "))  # Start time of the subclip
+    end_time = float(input("Enter the end time (in seconds): "))    # End time of the subclip
 
-# 	# Insert the data into the table
-# 	cur.execute(
-# 		'''INSERT INTO products \
-# 		(name, price) VALUES (%s, %s)''',
-# 		(name, price))
+    # Get the user's "Downloads" folder path
+    downloads_folder = os.path.expanduser("~") + "/Downloads/"
 
-# 	# commit the changes
-# 	conn.commit()
+    # Output subclip file name
+    output_subclip = downloads_folder + "output_subclip.mp4"
 
-# 	# close the cursor and connection
-# 	cur.close()
-# 	conn.close()
+    # Load the input video using VideoFileClip
+    video_clip = VideoFileClip(input_video)
 
-# 	return redirect(url_for('index'))
+    # Create the subclip with both video and audio
+    subclip = video_clip.subclip(start_time, end_time)
 
+    # Write the subclip to a file with audio included
+    subclip.write_videofile(output_subclip, audio_codec='aac')
 
-# @app.route('/update', methods=['POST'])
-# def update():
-# 	conn = psycopg2.connect(database="flask_db",
-# 							user="postgres",
-# 							password="root",
-# 							host="localhost", port="5432")
-
-# 	cur = conn.cursor()
-
-# 	# Get the data from the form
-# 	name = request.form['name']
-# 	price = request.form['price']
-# 	id = request.form['id']
-
-# 	# Update the data in the table
-# 	cur.execute(
-# 		'''UPDATE products SET name=%s,\
-# 		price=%s WHERE id=%s''', (name, price, id))
-
-# 	# commit the changes
-# 	conn.commit()
-# 	return redirect(url_for('index'))
-
-
-# @app.route('/delete', methods=['POST'])
-# def delete():
-# 	conn = psycopg2.connect
-# 	(database="flask_db", user="postgres",
-# 	password="root",
-# 	host="localhost", port="5432")
-# 	cur = conn.cursor()
-
-# 	# Get the data from the form
-# 	id = request.form['id']
-
-# 	# Delete the data from the table
-# 	cur.execute('''DELETE FROM products WHERE id=%s''', (id,))
-
-# 	# commit the changes
-# 	conn.commit()
-
-# 	# close the cursor and connection
-# 	cur.close()
-# 	conn.close()
-
-# 	return redirect(url_for('index'))
-
+    print("Subclip with audio created successfully.")
 
 if __name__ == '__main__':
 	app.run(debug=True)
