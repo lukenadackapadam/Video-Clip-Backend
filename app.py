@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import psycopg2
 from moviepy.editor import VideoFileClip
 import os
 
@@ -52,7 +51,7 @@ def subclip():
 		return jsonify({"Message": "Subclip with audio created successfully."}), 200
 	
 	except Exception as e:
-		return jsonify({'error': str(e)}), 500
+		return jsonify({'error': 'An error has occurred, please try again.'}), 500
 
 
 if __name__ == '__main__':
