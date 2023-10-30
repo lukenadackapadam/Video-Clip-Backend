@@ -17,13 +17,6 @@ def subclip():
 		return jsonify({'error': 'No video file provided'}), 400
 	
 	try:
-
-		# print(f"=====, {file_name}")
-		# file_name = 'abc'
-		# print(bool(file_name))
-		# file_name = ""
-		# print(bool(file_name))
-
 			# Get the user's "Downloads" folder path
 		downloads_folder = os.path.expanduser("~") + "/Downloads/"
 
